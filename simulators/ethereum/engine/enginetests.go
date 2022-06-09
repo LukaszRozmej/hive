@@ -1626,7 +1626,13 @@ func transactionReorg(t *TestEnv) {
 
 				reorgReceipt, err := t.Eth.TransactionReceipt(t.Ctx(), tx.Hash())
 				if reorgReceipt != nil {
-					t.Fatalf("FAIL (%s): Receipt was obtained when the tx had been re-org'd out: %v", t.TestName, reorgReceipt)
+					allRemoved := true
+					for i := 0; i < len(reorgReceipt.Logs); i++ {
+						allRemoved = allRemoved && reorgReceipt.Logs[i].Removed
+					}
+					if !allRemoved {
+						t.Fatalf("FAIL (%s): Receipt was obtained when the tx had been re-org'd out: %v", t.TestName, reorgReceipt)
+					}
 				}
 
 				// Re-org back
